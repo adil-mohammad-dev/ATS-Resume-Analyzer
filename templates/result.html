@@ -3,6 +3,7 @@
 <head>
     <title>ATS Result</title>
     {% load static %}
+
     <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
 
@@ -24,25 +25,25 @@
             <a href="/" class="back-btn">Analyze Another Resume</a>
         </div>
 
-        <div class="score-summary-grid">
+        <div class="score-summary-grid compact-grid">
 
-            <div class="score-main-card">
+            <div class="score-main-card dark-score-card">
                 <h3>ATS Score</h3>
                 <div class="big-score">{{ ats_score }}%</div>
                 <p>{{ decision }}</p>
             </div>
 
-            <div class="mini-summary-card">
+            <div class="mini-summary-card color-card green-card">
                 <h4>Matched Skills</h4>
                 <p>{{ matched_count }}</p>
             </div>
 
-            <div class="mini-summary-card">
+            <div class="mini-summary-card color-card red-card">
                 <h4>Missing Skills</h4>
                 <p>{{ missing_count }}</p>
             </div>
 
-            <div class="mini-summary-card">
+            <div class="mini-summary-card color-card blue-card">
                 <h4>JD Skills</h4>
                 <p>{{ jd_count }}</p>
             </div>
@@ -50,10 +51,15 @@
         </div>
 
         <div class="report-card-final">
-            <h2>Detailed AI Report</h2>
+            <div class="report-title-row">
+                <div>
+                    <p class="tag">DETAILED SCREENING REPORT</p>
+                    <h2>AI Resume Feedback</h2>
+                </div>
+            </div>
 
-            <div class="result-content">
-{{ result }}
+            <div class="result-content professional-report">
+{{ result|safe }}
             </div>
         </div>
 

@@ -33,7 +33,6 @@ def analyze_resume(request):
         resume = request.FILES["resume"]
         job_desc = request.POST.get("jobdesc", "")
 
-        # Create uploads folder automatically on Render/local
         upload_folder = "uploads"
 
         if not os.path.exists(upload_folder):
@@ -50,7 +49,6 @@ def analyze_resume(request):
         resume_lower = resume_text.lower()
         job_lower = job_desc.lower()
 
-        # Skill aliases
         skill_aliases = {
             "python": ["python"],
             "java": ["java"],
@@ -124,7 +122,6 @@ def analyze_resume(request):
             "teamwork": ["teamwork", "team work"],
         }
 
-        # Role-based skills for jobs and internships
         role_skill_map = {
             "web developer": [
                 "html", "css", "javascript", "bootstrap", "git", "github",
@@ -214,7 +211,6 @@ def analyze_resume(request):
             if role in job_lower:
                 role_based_skills.extend(skills)
 
-        # Support internship wording
         if "intern" in job_lower or "internship" in job_lower:
             if "web" in job_lower:
                 role_based_skills.extend(role_skill_map["web developer"])
@@ -231,7 +227,6 @@ def analyze_resume(request):
             elif "qa" in job_lower or "testing" in job_lower:
                 role_based_skills.extend(role_skill_map["qa tester"])
 
-        # Extract JD required skills
         jd_required_skills = []
 
         for skill, aliases in skill_aliases.items():
@@ -243,7 +238,6 @@ def analyze_resume(request):
             if skill not in jd_required_skills:
                 jd_required_skills.append(skill)
 
-        # Extract resume skills
         resume_skills = []
 
         for skill, aliases in skill_aliases.items():
@@ -251,7 +245,6 @@ def analyze_resume(request):
                 if alias in resume_lower and skill not in resume_skills:
                     resume_skills.append(skill)
 
-        # Evidence keywords
         project_keywords = [
             "project", "developed", "built", "created", "implemented",
             "designed", "deployed", "integrated", "dashboard", "website",
@@ -298,7 +291,6 @@ def analyze_resume(request):
             keyword for keyword in education_keywords if keyword in resume_lower
         ]
 
-        # Match skills
         matched_skills = []
         missing_skills = []
 
@@ -308,7 +300,6 @@ def analyze_resume(request):
             else:
                 missing_skills.append(skill)
 
-        # ATS score calculation
         if len(jd_required_skills) > 0:
             skill_score = int((len(matched_skills) / len(jd_required_skills)) * 75)
         else:
@@ -360,6 +351,8 @@ Very Important Rules:
 - The ATS score is already calculated logically. Do not change it.
 - Analyze full resume including skills, projects, internships, work experience, certifications, achievements, and education.
 - Support both jobs and internships.
+- Do not use markdown symbols like **, ##, ###.
+- Keep section headings clean and readable.
 
 Job Description:
 {job_desc}
@@ -429,6 +422,35 @@ Generate a clean professional report in this exact format:
         )
 
         result = chat_completion.choices[0].message.content
+
+        # Remove markdown symbols
+        result = result.replace("**", "")
+        result = result.replace("###", "")
+        result = result.replace("##", "")
+
+        # Highlight report section headings
+        section_headings = [
+            "ATS Score",
+            "Application Decision",
+            "JD Required Skills",
+            "Skills Found In Resume",
+            "Matched Skills",
+            "Missing Important Skills",
+            "Project Relevance",
+            "Internship / Work Experience Relevance",
+            "Achievement / Certification Relevance",
+            "Education Relevance",
+            "Is This Resume Suitable For The Job?",
+            "Resume Improvement Suggestions",
+            "Skills To Learn Before Applying",
+            "Final Recommendation"
+        ]
+
+        for heading in section_headings:
+            result = result.replace(
+                heading + ":",
+                '<span class="report-heading">' + heading + ':</span>'
+            )
 
         request.session["result"] = result
         request.session["ats_score"] = ats_score

@@ -11,6 +11,7 @@
 
 <div class="page">
 
+    <!-- Navbar -->
     <nav class="navbar">
         <div class="logo-box">
             <div class="logo">AI</div>
@@ -21,12 +22,11 @@
         </div>
 
         <div class="nav-links">
-            <span>ATS Score</span>
-            <span>JD Match</span>
-            <span>Skill Gap</span>
+            <a href="#analyze-section">Analyze Resume</a>
         </div>
     </nav>
 
+    <!-- Hero Section -->
     <section class="hero">
 
         <div class="hero-left">
@@ -39,7 +39,8 @@
                 matched skills, missing skills, job-fit analysis, and improvement suggestions.
             </p>
 
-            <div class="upload-panel">
+            <!-- Upload Form -->
+            <div class="upload-panel" id="analyze-section">
                 <form method="POST" enctype="multipart/form-data" action="{% url 'analyze_resume' %}">
                     {% csrf_token %}
 
@@ -50,7 +51,11 @@
 
                     <div class="form-group">
                         <label>Paste Job Description</label>
-                        <textarea name="jobdesc" rows="6" placeholder="Paste the job description here..." required></textarea>
+                        <textarea
+                            name="jobdesc"
+                            rows="6"
+                            placeholder="Paste the job description here..."
+                            required></textarea>
                     </div>
 
                     <button type="submit">Analyze Resume</button>
@@ -60,58 +65,60 @@
             </div>
         </div>
 
+        <!-- Right Info Card -->
         <div class="hero-right">
             <div class="preview-card">
 
                 <div class="preview-header">
-                    <h3>Resume Score</h3>
-                    <span>AI Report</span>
+                    <h3>What This System Checks</h3>
+                    <span>Real Analysis</span>
                 </div>
 
-                <div class="score-box">
-                    <div class="score-circle">
-                        <h2>92</h2>
-                        <p>/100</p>
+                <div class="analysis-flow">
+
+                    <div class="flow-step">
+                        <div class="step-number">1</div>
+                        <div>
+                            <h4>Resume Parsing</h4>
+                            <p>Extracts text from the uploaded resume PDF.</p>
+                        </div>
                     </div>
-                    <div>
-                        <h4>ATS Analysis</h4>
-                        <p>Skills, projects, experience and JD matching are analyzed professionally.</p>
+
+                    <div class="flow-step">
+                        <div class="step-number">2</div>
+                        <div>
+                            <h4>JD Skill Matching</h4>
+                            <p>Compares resume skills with the job description requirements.</p>
+                        </div>
                     </div>
+
+                    <div class="flow-step">
+                        <div class="step-number">3</div>
+                        <div>
+                            <h4>ATS Score Calculation</h4>
+                            <p>Calculates score based on matched skills and resume evidence.</p>
+                        </div>
+                    </div>
+
+                    <div class="flow-step">
+                        <div class="step-number">4</div>
+                        <div>
+                            <h4>AI Improvement Report</h4>
+                            <p>Generates missing skills, suitability, and resume improvement suggestions.</p>
+                        </div>
+                    </div>
+
                 </div>
 
-                <div class="check-list">
-                    <div>✓ Resume Parsing</div>
-                    <div>✓ Skill Matching</div>
-                    <div>✓ Missing Skills</div>
-                    <div>✓ Improvement Suggestions</div>
+                <div class="info-note">
+                    <strong>Output:</strong> ATS score, matched skills, missing skills, project relevance,
+                    and final recommendation.
                 </div>
 
             </div>
         </div>
 
     </section>
-
-    {% if result %}
-
-    <section class="result-section">
-        <div class="result-card">
-
-            <div class="result-heading">
-                <div>
-                    <p class="tag">GENERATED REPORT</p>
-                    <h2>AI Analysis Result</h2>
-                    <span>Professional ATS and job-fit report</span>
-                </div>
-            </div>
-
-            <div class="result-content">
-{{ result }}
-            </div>
-
-        </div>
-    </section>
-
-    {% endif %}
 
 </div>
 
