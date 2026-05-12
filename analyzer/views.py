@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 from groq import Groq
 import pdfplumber
 import os
-import re
 
 
 client = Groq(
@@ -11,7 +10,7 @@ client = Groq(
 
 
 def extract_text(pdf_path):
-    text = ''
+    text = ""
 
     with pdfplumber.open(pdf_path) as pdf:
         for page in pdf.pages:
@@ -23,27 +22,26 @@ def extract_text(pdf_path):
     return text
 
 
-def contains_any(text, words):
-    for word in words:
-        if word in text:
-            return True
-    return False
-
-
 def home(request):
-    return render(request, 'index.html')
+    return render(request, "index.html")
 
 
 def analyze_resume(request):
 
-    if request.method == 'POST':
+    if request.method == "POST":
 
-        resume = request.FILES['resume']
-        job_desc = request.POST.get('jobdesc')
+        resume = request.FILES["resume"]
+        job_desc = request.POST.get("jobdesc", "")
 
-        filepath = os.path.join('uploads', resume.name)
+        # Create uploads folder automatically on Render/local
+        upload_folder = "uploads"
 
-        with open(filepath, 'wb+') as destination:
+        if not os.path.exists(upload_folder):
+            os.makedirs(upload_folder)
+
+        filepath = os.path.join(upload_folder, resume.name)
+
+        with open(filepath, "wb+") as destination:
             for chunk in resume.chunks():
                 destination.write(chunk)
 
@@ -123,10 +121,10 @@ def analyze_resume(request):
             "deployment": ["deployment", "deployed", "render", "vercel", "netlify"],
             "problem solving": ["problem solving", "problem-solving"],
             "communication": ["communication"],
-            "teamwork": ["teamwork", "team work"]
+            "teamwork": ["teamwork", "team work"],
         }
 
-        # Role-based skill support for common IT jobs and internships
+        # Role-based skills for jobs and internships
         role_skill_map = {
             "web developer": [
                 "html", "css", "javascript", "bootstrap", "git", "github",
@@ -207,17 +205,16 @@ def analyze_resume(request):
             "software developer": [
                 "python", "java", "javascript", "sql", "git", "github",
                 "database", "problem solving"
-            ]
+            ],
         }
 
-        # Internship role support
         role_based_skills = []
 
         for role, skills in role_skill_map.items():
             if role in job_lower:
                 role_based_skills.extend(skills)
 
-        # Also support "intern" wording
+        # Support internship wording
         if "intern" in job_lower or "internship" in job_lower:
             if "web" in job_lower:
                 role_based_skills.extend(role_skill_map["web developer"])
@@ -234,29 +231,27 @@ def analyze_resume(request):
             elif "qa" in job_lower or "testing" in job_lower:
                 role_based_skills.extend(role_skill_map["qa tester"])
 
-        # Extract explicitly mentioned JD skills
+        # Extract JD required skills
         jd_required_skills = []
 
         for skill, aliases in skill_aliases.items():
             for alias in aliases:
-                if alias in job_lower:
-                    if skill not in jd_required_skills:
-                        jd_required_skills.append(skill)
+                if alias in job_lower and skill not in jd_required_skills:
+                    jd_required_skills.append(skill)
 
-        # Add role-based skills
         for skill in role_based_skills:
             if skill not in jd_required_skills:
                 jd_required_skills.append(skill)
 
-        # Extract resume skills from full resume text
+        # Extract resume skills
         resume_skills = []
 
         for skill, aliases in skill_aliases.items():
             for alias in aliases:
-                if alias in resume_lower:
-                    if skill not in resume_skills:
-                        resume_skills.append(skill)
+                if alias in resume_lower and skill not in resume_skills:
+                    resume_skills.append(skill)
 
+        # Evidence keywords
         project_keywords = [
             "project", "developed", "built", "created", "implemented",
             "designed", "deployed", "integrated", "dashboard", "website",
@@ -283,31 +278,27 @@ def analyze_resume(request):
             "college", "university"
         ]
 
-        project_evidence = []
-        for keyword in project_keywords:
-            if keyword in resume_lower:
-                project_evidence.append(keyword)
+        project_evidence = [
+            keyword for keyword in project_keywords if keyword in resume_lower
+        ]
 
-        internship_evidence = []
-        for keyword in internship_keywords:
-            if keyword in resume_lower:
-                internship_evidence.append(keyword)
+        internship_evidence = [
+            keyword for keyword in internship_keywords if keyword in resume_lower
+        ]
 
-        work_evidence = []
-        for keyword in work_keywords:
-            if keyword in resume_lower:
-                work_evidence.append(keyword)
+        work_evidence = [
+            keyword for keyword in work_keywords if keyword in resume_lower
+        ]
 
-        achievement_evidence = []
-        for keyword in achievement_keywords:
-            if keyword in resume_lower:
-                achievement_evidence.append(keyword)
+        achievement_evidence = [
+            keyword for keyword in achievement_keywords if keyword in resume_lower
+        ]
 
-        education_evidence = []
-        for keyword in education_keywords:
-            if keyword in resume_lower:
-                education_evidence.append(keyword)
+        education_evidence = [
+            keyword for keyword in education_keywords if keyword in resume_lower
+        ]
 
+        # Match skills
         matched_skills = []
         missing_skills = []
 
@@ -330,11 +321,11 @@ def analyze_resume(request):
         education_score = min(len(education_evidence) * 2, 5)
 
         evidence_score = (
-            project_score +
-            internship_score +
-            work_score +
-            achievement_score +
-            education_score
+            project_score
+            + internship_score
+            + work_score
+            + achievement_score
+            + education_score
         )
 
         if evidence_score > 25:
@@ -357,7 +348,7 @@ def analyze_resume(request):
         else:
             decision = "Low Fit - Not Recommended Until Resume Improves"
 
-        prompt = f'''
+        prompt = f"""
 You are a professional ATS Resume Analyzer and HR screening assistant.
 
 Very Important Rules:
@@ -425,7 +416,7 @@ Generate a clean professional report in this exact format:
 12. Resume Improvement Suggestions:
 13. Skills To Learn Before Applying:
 14. Final Recommendation:
-'''
+"""
 
         chat_completion = client.chat.completions.create(
             messages=[
@@ -439,30 +430,30 @@ Generate a clean professional report in this exact format:
 
         result = chat_completion.choices[0].message.content
 
-        request.session['result'] = result
-        request.session['ats_score'] = ats_score
-        request.session['decision'] = decision
-        request.session['matched_count'] = len(matched_skills)
-        request.session['missing_count'] = len(missing_skills)
-        request.session['jd_count'] = len(jd_required_skills)
+        request.session["result"] = result
+        request.session["ats_score"] = ats_score
+        request.session["decision"] = decision
+        request.session["matched_count"] = len(matched_skills)
+        request.session["missing_count"] = len(missing_skills)
+        request.session["jd_count"] = len(jd_required_skills)
 
-        return redirect('/result/')
+        return redirect("/result/")
 
-    return redirect('/')
+    return redirect("/")
 
 
 def result_page(request):
 
-    result = request.session.get('result', None)
+    result = request.session.get("result", None)
 
     if not result:
-        return redirect('/')
+        return redirect("/")
 
-    return render(request, 'result.html', {
-        'result': result,
-        'ats_score': request.session.get('ats_score', 0),
-        'decision': request.session.get('decision', ''),
-        'matched_count': request.session.get('matched_count', 0),
-        'missing_count': request.session.get('missing_count', 0),
-        'jd_count': request.session.get('jd_count', 0),
+    return render(request, "result.html", {
+        "result": result,
+        "ats_score": request.session.get("ats_score", 0),
+        "decision": request.session.get("decision", ""),
+        "matched_count": request.session.get("matched_count", 0),
+        "missing_count": request.session.get("missing_count", 0),
+        "jd_count": request.session.get("jd_count", 0),
     })
