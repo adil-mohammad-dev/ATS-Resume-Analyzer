@@ -4,6 +4,8 @@
     <title>AI Resume Builder</title>
     {% load static %}
 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
     <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
@@ -49,6 +51,17 @@
 
             <form method="POST" action="{% url 'build_resume' %}" id="resumeForm">
                 {% csrf_token %}
+
+                {% if form_errors %}
+                    <div class="error-card">
+                        <p><strong>Please fix the following:</strong></p>
+                        <ul>
+                            {% for field, errors in form_errors.items %}
+                                <li><strong>{{ field }}:</strong> {{ errors|join:", " }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
 
                 <!-- Personal Info -->
                 <section class="builder-section expanded" id="personal">

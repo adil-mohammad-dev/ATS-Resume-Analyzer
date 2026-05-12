@@ -4,6 +4,8 @@
     <title>ATS Result</title>
     {% load static %}
 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
     <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
@@ -47,6 +49,71 @@
             <div class="mini-summary-card color-card blue-card">
                 <h4>JD Skills</h4>
                 <p>{{ jd_count }}</p>
+            </div>
+
+        </div>
+
+        <div class="ats-breakdown-card">
+
+            <div class="report-title-row">
+                <div>
+                    <p class="tag">SCORING METRICS</p>
+                    <h2>ATS Score Breakdown</h2>
+                </div>
+            </div>
+
+            <div class="breakdown-grid">
+
+                <div class="breakdown-item">
+                    <div class="breakdown-top">
+                        <span>Keyword Optimization</span>
+                        <strong>{{ keyword_score }}/40</strong>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="--width: {{ keyword_pct }}px;"></div>
+                    </div>
+                </div>
+
+                <div class="breakdown-item">
+                    <div class="breakdown-top">
+                        <span>Resume Parsing</span>
+                        <strong>{{ parsing_score }}/20</strong>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="--width: {{ parsing_pct }}px;"></div>
+                    </div>
+                </div>
+
+                <div class="breakdown-item">
+                    <div class="breakdown-top">
+                        <span>Content Quality</span>
+                        <strong>{{ content_quality_score }}/20</strong>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="--width: {{ content_quality_pct }}px;"></div>
+                    </div>
+                </div>
+
+                <div class="breakdown-item">
+                    <div class="breakdown-top">
+                        <span>Section Completeness</span>
+                        <strong>{{ section_score }}/10</strong>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="--width: {{ section_pct }}px;"></div>
+                    </div>
+                </div>
+
+                <div class="breakdown-item">
+                    <div class="breakdown-top">
+                        <span>Impact / Achievement</span>
+                        <strong>{{ impact_score }}/10</strong>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="--width: {{ impact_pct }}px;"></div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
