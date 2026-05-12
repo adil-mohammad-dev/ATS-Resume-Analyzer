@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Resume Analyzer</title>
+    {% load static %}
+
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+
+<body>
+
+<div class="page">
+
+    <nav class="navbar">
+        <div class="logo-box">
+            <div class="logo">AI</div>
+            <div>
+                <h2>ResumeAI</h2>
+                <p>ATS Resume Analyzer</p>
+            </div>
+        </div>
+
+        <div class="nav-links">
+            <span>ATS Score</span>
+            <span>JD Match</span>
+            <span>Skill Gap</span>
+        </div>
+    </nav>
+
+    <section class="hero">
+
+        <div class="hero-left">
+            <p class="tag">AI POWERED RESUME CHECKER</p>
+
+            <h1>Is your resume good enough for this job?</h1>
+
+            <p class="subtitle">
+                Upload your resume and paste a job description to get a professional ATS score,
+                matched skills, missing skills, job-fit analysis, and improvement suggestions.
+            </p>
+
+            <div class="upload-panel">
+                <form method="POST" enctype="multipart/form-data" action="{% url 'analyze_resume' %}">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label>Upload Resume PDF</label>
+                        <input type="file" name="resume" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Paste Job Description</label>
+                        <textarea name="jobdesc" rows="6" placeholder="Paste the job description here..." required></textarea>
+                    </div>
+
+                    <button type="submit">Analyze Resume</button>
+                </form>
+
+                <p class="privacy">🔒 Your resume is used only for analysis.</p>
+            </div>
+        </div>
+
+        <div class="hero-right">
+            <div class="preview-card">
+
+                <div class="preview-header">
+                    <h3>Resume Score</h3>
+                    <span>AI Report</span>
+                </div>
+
+                <div class="score-box">
+                    <div class="score-circle">
+                        <h2>92</h2>
+                        <p>/100</p>
+                    </div>
+                    <div>
+                        <h4>ATS Analysis</h4>
+                        <p>Skills, projects, experience and JD matching are analyzed professionally.</p>
+                    </div>
+                </div>
+
+                <div class="check-list">
+                    <div>✓ Resume Parsing</div>
+                    <div>✓ Skill Matching</div>
+                    <div>✓ Missing Skills</div>
+                    <div>✓ Improvement Suggestions</div>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
+
+    {% if result %}
+
+    <section class="result-section">
+        <div class="result-card">
+
+            <div class="result-heading">
+                <div>
+                    <p class="tag">GENERATED REPORT</p>
+                    <h2>AI Analysis Result</h2>
+                    <span>Professional ATS and job-fit report</span>
+                </div>
+            </div>
+
+            <div class="result-content">
+{{ result }}
+            </div>
+
+        </div>
+    </section>
+
+    {% endif %}
+
+</div>
+
+</body>
+</html>

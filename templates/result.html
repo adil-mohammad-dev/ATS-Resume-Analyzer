@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ATS Result</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+
+<body>
+
+<div class="result-page">
+
+    <div class="result-container">
+
+        <div class="result-header-card">
+            <div>
+                <p class="tag">AI GENERATED ATS REPORT</p>
+                <h1>Resume Analysis Result</h1>
+                <p class="subtitle-small">
+                    Your resume has been analyzed against the job description.
+                </p>
+            </div>
+
+            <a href="/" class="back-btn">Analyze Another Resume</a>
+        </div>
+
+        <div class="score-summary-grid">
+
+            <div class="score-main-card">
+                <h3>ATS Score</h3>
+                <div class="big-score">{{ ats_score }}%</div>
+                <p>{{ decision }}</p>
+            </div>
+
+            <div class="mini-summary-card">
+                <h4>Matched Skills</h4>
+                <p>{{ matched_count }}</p>
+            </div>
+
+            <div class="mini-summary-card">
+                <h4>Missing Skills</h4>
+                <p>{{ missing_count }}</p>
+            </div>
+
+            <div class="mini-summary-card">
+                <h4>JD Skills</h4>
+                <p>{{ jd_count }}</p>
+            </div>
+
+        </div>
+
+        <div class="report-card-final">
+            <h2>Detailed AI Report</h2>
+
+            <div class="result-content">
+{{ result }}
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
