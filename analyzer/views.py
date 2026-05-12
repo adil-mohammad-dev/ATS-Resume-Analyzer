@@ -4,11 +4,10 @@ from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.shortcuts import render, redirect
 
-from .forms import ResumeAnalysisForm, ResumeBuilderForm
+from .forms import ResumeAnalysisForm
 from .utils import (
     build_analysis_prompt,
     build_job_specific_skills,
-    build_resume_prompt,
     calculate_ats_score,
     clean_ai_output,
     collect_evidence,
@@ -149,44 +148,4 @@ def result_page(request):
         "content_quality_pct": content_quality_pct,
         "section_pct": section_pct,
         "impact_pct": impact_pct,
-    })
-
-
-def resume_builder(request):
-    return render(request, "resume_builder.html")
-
-
-def build_resume(request):
-    if request.method != "POST":
-        return redirect("resume_builder")
-
-    form = ResumeBuilderForm(request.POST)
-    if not form.is_valid():
-        return render(request, "resume_builder.html", {"form_errors": form.errors})
-
-    details = form.cleaned_data
-    prompt = build_resume_prompt(details)
-
-    try:
-        client = get_groq_client()
-        chat_completion = client.chat.completions.create(
-            messages=[{"role": "user", "content": prompt}],
-            model="llama-3.1-8b-instant",
-        )
-        generated_resume = clean_ai_output(chat_completion.choices[0].message.content)
-        request.session["generated_resume"] = generated_resume
-        return redirect("builder_result")
-    except Exception as error:
-        return render(request, "resume_builder.html", {
-            "form_errors": {"resume_builder": [str(error)]}
-        })
-
-
-def builder_result(request):
-    generated_resume = request.session.get("generated_resume")
-    if not generated_resume:
-        return redirect("resume_builder")
-
-    return render(request, "builder_result.html", {
-        "generated_resume": generated_resume,
     })

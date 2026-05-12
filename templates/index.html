@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AI Resume Analyzer & Builder</title>
+    <title>AI Resume Analyzer</title>
     {% load static %}
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="{% static 'images/favicon.png' %}">
     <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
@@ -19,13 +22,12 @@
             <div class="logo">AI</div>
             <div>
                 <h2>ResumeAI</h2>
-                <p>Analyzer & Resume Builder</p>
+                <p>Analyzer</p>
             </div>
         </div>
 
         <div class="nav-links">
             <a href="#analyze-section">Analyze Resume</a>
-            <a href="{% url 'resume_builder' %}" class="secondary-nav">Create Resume</a>
         </div>
     </nav>
 
@@ -37,8 +39,7 @@
             <h1>Build and analyze resumes for job role.</h1>
 
             <p class="subtitle">
-                Analyze your resume against your job descriptions. You can also
-                create a professional ATS-friendly resume using AI.
+                Analyze your resume against your job descriptions.
             </p>
 
             <div class="upload-panel" id="analyze-section">
@@ -129,6 +130,23 @@
         </div>
 
     </section>
+
+    <footer class="developer-footer">
+        <div class="footer-content">
+            <p>Developed by Mohammad Adil</p>
+            <div class="social-links">
+                <a href="https://github.com/adil-mohammad-dev" target="_blank" title="GitHub">
+                    <i class="fab fa-github"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/mohammad-adil-dev/" target="_blank" title="LinkedIn">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+                <!-- <a href="https://instagram.com/your-instagram-handle" target="_blank" title="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a> -->
+            </div>
+        </div>
+    </footer>
 
 </div>
 

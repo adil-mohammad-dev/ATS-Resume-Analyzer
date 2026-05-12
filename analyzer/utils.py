@@ -520,49 +520,6 @@ Generate a clean professional ATS report in this exact format:
 """
 
 
-def build_resume_prompt(details):
-    return f"""
-You are an expert resume writer and ATS optimization specialist.
-
-Create a professional ATS-friendly resume content for the following candidate.
-Support IT and non-IT roles.
-Keep it professional, concise, and recruiter-friendly.
-Do not use markdown symbols like **, ##, ###.
-Use strong action verbs.
-Create content suitable for a resume.
-
-Candidate Details:
-Name: {details['full_name']}
-Email: {details['email']}
-Phone: {details['phone']}
-Location: {details.get('location', '')}
-LinkedIn: {details.get('linkedin', '')}
-Portfolio: {details.get('portfolio', '')}
-Target Role: {details['target_role']}
-Career Level: {details['career_level']}
-Resume Type: {details['resume_type']}
-Resume Tone: {details.get('resume_tone', '')}
-Education: {details['education']}
-Skills: {details['skills']}
-Projects: {details.get('projects', '')}
-Experience / Internship: {details.get('experience', '')}
-Certifications: {details.get('certifications', '')}
-Achievements: {details.get('achievements', '')}
-
-Generate resume in this format:
-
-Professional Summary:
-Career Objective:
-Key Skills:
-Education:
-Projects:
-Experience / Internship:
-Certifications:
-Achievements:
-ATS Improvement Tips:
-"""
-
-
 def validate_pdf_file(uploaded_file):
     name = uploaded_file.name.lower()
     if not name.endswith(".pdf"):
