@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from groq import Groq
 import pdfplumber
 import os
+import re
 
 
 client = Groq(
@@ -24,6 +25,49 @@ def extract_text(pdf_path):
 
 def home(request):
     return render(request, "index.html")
+
+
+def clean_ai_output(text):
+    text = text.replace("**", "")
+    text = text.replace("###", "")
+    text = text.replace("##", "")
+    text = text.replace("* ", "- ")
+
+    section_headings = [
+        "ATS Score",
+        "Application Decision",
+        "Job Role Identified",
+        "JD Required Skills",
+        "Skills Found In Resume",
+        "Matched Skills",
+        "Missing Important Skills",
+        "Project Relevance",
+        "Internship / Work Experience Relevance",
+        "Achievement / Certification Relevance",
+        "Education Relevance",
+        "Is This Resume Suitable For The Job?",
+        "Resume Improvement Suggestions",
+        "Skills To Learn Before Applying",
+        "Final Recommendation",
+        "Professional Summary",
+        "Career Objective",
+        "Skills",
+        "Education",
+        "Projects",
+        "Experience",
+        "Internship",
+        "Certifications",
+        "Achievements",
+        "ATS Improvement Tips",
+    ]
+
+    for heading in section_headings:
+        text = text.replace(
+            heading + ":",
+            '<span class="report-heading">' + heading + ':</span>'
+        )
+
+    return text
 
 
 def analyze_resume(request):
@@ -50,6 +94,7 @@ def analyze_resume(request):
         job_lower = job_desc.lower()
 
         skill_aliases = {
+            # IT / Software
             "python": ["python"],
             "java": ["java"],
             "javascript": ["javascript", "java script", "js"],
@@ -71,7 +116,13 @@ def analyze_resume(request):
             "rest api": ["rest api", "restful api", "api"],
             "git": ["git"],
             "github": ["github"],
+            "database": ["database", "databases", "dbms"],
+            "frontend": ["frontend", "front-end", "front end"],
+            "backend": ["backend", "back-end", "back end"],
+            "full stack": ["full stack", "fullstack"],
+            "deployment": ["deployment", "deployed", "render", "vercel", "netlify"],
 
+            # Data / Analytics
             "excel": ["excel", "ms excel", "advanced excel"],
             "power bi": ["power bi", "powerbi"],
             "tableau": ["tableau"],
@@ -81,20 +132,24 @@ def analyze_resume(request):
             "matplotlib": ["matplotlib"],
             "seaborn": ["seaborn"],
             "statistics": ["statistics", "statistical"],
+            "reporting": ["reporting", "reports"],
+            "dashboard": ["dashboard", "dashboards"],
 
+            # AI / ML
             "machine learning": ["machine learning", "ml"],
             "deep learning": ["deep learning"],
             "tensorflow": ["tensorflow"],
             "pytorch": ["pytorch"],
             "scikit-learn": ["scikit-learn", "sklearn"],
 
+            # Testing / QA
             "manual testing": ["manual testing"],
             "automation testing": ["automation testing"],
             "selenium": ["selenium"],
             "pytest": ["pytest"],
-            "junit": ["junit"],
             "test cases": ["test cases", "test case"],
 
+            # Cloud / DevOps
             "aws": ["aws", "amazon web services"],
             "azure": ["azure"],
             "google cloud": ["google cloud", "gcp"],
@@ -103,106 +158,111 @@ def analyze_resume(request):
             "linux": ["linux"],
             "ci/cd": ["ci/cd", "cicd", "continuous integration"],
 
-            "cybersecurity": ["cybersecurity", "cyber security"],
-            "networking": ["networking", "computer networks"],
-            "firewall": ["firewall"],
-            "penetration testing": ["penetration testing", "pentesting"],
+            # Banking / Finance / Accounting / CA
+            "accounting": ["accounting", "accounts"],
+            "finance": ["finance", "financial"],
+            "banking": ["banking", "bank"],
+            "tally": ["tally", "tally erp"],
+            "gst": ["gst"],
+            "taxation": ["taxation", "tax"],
+            "auditing": ["auditing", "audit"],
+            "bookkeeping": ["bookkeeping"],
+            "financial analysis": ["financial analysis"],
+            "investment": ["investment", "investments"],
+            "risk management": ["risk management"],
+            "loan processing": ["loan processing"],
+            "kyc": ["kyc"],
+            "ms office": ["ms office", "microsoft office"],
+            "balance sheet": ["balance sheet"],
+            "profit and loss": ["profit and loss", "p&l"],
 
-            "figma": ["figma"],
-            "ui/ux": ["ui/ux", "ui ux", "user interface", "user experience"],
-            "wireframing": ["wireframing", "wireframe"],
+            # HR / Management / Operations
+            "hr": ["hr", "human resources"],
+            "recruitment": ["recruitment", "recruiter", "hiring"],
+            "payroll": ["payroll"],
+            "employee engagement": ["employee engagement"],
+            "operations": ["operations", "operational"],
+            "inventory management": ["inventory management", "inventory"],
+            "vendor management": ["vendor management"],
+            "supply chain": ["supply chain"],
+            "project management": ["project management"],
 
-            "database": ["database", "databases", "dbms"],
-            "frontend": ["frontend", "front-end", "front end"],
-            "backend": ["backend", "back-end", "back end"],
-            "full stack": ["full stack", "fullstack"],
-            "deployment": ["deployment", "deployed", "render", "vercel", "netlify"],
-            "problem solving": ["problem solving", "problem-solving"],
+            # Sales / Marketing
+            "sales": ["sales", "selling"],
+            "marketing": ["marketing"],
+            "digital marketing": ["digital marketing"],
+            "seo": ["seo", "search engine optimization"],
+            "social media marketing": ["social media marketing"],
+            "lead generation": ["lead generation"],
+            "crm": ["crm"],
+            "customer relationship": ["customer relationship"],
+
+            # Teaching / Education
+            "teaching": ["teaching", "teacher", "faculty"],
+            "lesson planning": ["lesson planning"],
+            "classroom management": ["classroom management"],
+            "student assessment": ["student assessment"],
+            "curriculum": ["curriculum"],
             "communication": ["communication"],
+
+            # Healthcare / Hospitality / Support
+            "customer support": ["customer support", "customer service"],
+            "bpo": ["bpo", "call center"],
+            "healthcare": ["healthcare", "hospital"],
+            "patient care": ["patient care"],
+            "hospitality": ["hospitality", "hotel"],
+            "front office": ["front office", "reception"],
+            "food service": ["food service"],
+
+            # Common soft skills
+            "problem solving": ["problem solving", "problem-solving"],
             "teamwork": ["teamwork", "team work"],
+            "leadership": ["leadership"],
+            "time management": ["time management"],
+            "adaptability": ["adaptability"],
+            "presentation skills": ["presentation skills"],
         }
 
         role_skill_map = {
-            "web developer": [
-                "html", "css", "javascript", "bootstrap", "git", "github",
-                "rest api", "database"
-            ],
-            "frontend developer": [
-                "html", "css", "javascript", "react", "bootstrap",
-                "tailwind css", "git", "github"
-            ],
-            "backend developer": [
-                "python", "django", "flask", "node.js", "express.js",
-                "sql", "mysql", "database", "rest api", "git"
-            ],
-            "full stack developer": [
-                "html", "css", "javascript", "python", "django", "node.js",
-                "express.js", "sql", "mysql", "rest api", "git", "github"
-            ],
-            "python developer": [
-                "python", "django", "flask", "sql", "mysql", "rest api",
-                "git", "database"
-            ],
-            "django developer": [
-                "python", "django", "sql", "mysql", "rest api", "git",
-                "html", "css"
-            ],
-            "java developer": [
-                "java", "sql", "mysql", "rest api", "git", "database"
-            ],
-            "data analyst": [
-                "sql", "excel", "python", "pandas", "numpy", "power bi",
-                "tableau", "data analytics", "matplotlib", "statistics"
-            ],
-            "business analyst": [
-                "excel", "sql", "power bi", "tableau", "data analytics",
-                "communication", "problem solving"
-            ],
-            "data scientist": [
-                "python", "sql", "pandas", "numpy", "machine learning",
-                "statistics", "matplotlib", "seaborn", "scikit-learn"
-            ],
-            "machine learning engineer": [
-                "python", "machine learning", "deep learning", "tensorflow",
-                "pytorch", "scikit-learn", "numpy", "pandas"
-            ],
-            "ai engineer": [
-                "python", "machine learning", "deep learning", "tensorflow",
-                "pytorch", "api", "numpy", "pandas"
-            ],
-            "qa tester": [
-                "manual testing", "automation testing", "selenium",
-                "test cases", "sql", "git"
-            ],
-            "software tester": [
-                "manual testing", "automation testing", "selenium",
-                "test cases", "sql"
-            ],
-            "devops engineer": [
-                "linux", "docker", "kubernetes", "aws", "ci/cd", "git",
-                "github"
-            ],
-            "cloud engineer": [
-                "aws", "azure", "google cloud", "linux", "docker",
-                "networking"
-            ],
-            "database developer": [
-                "sql", "mysql", "postgresql", "mongodb", "database"
-            ],
-            "ui ux designer": [
-                "ui/ux", "figma", "wireframing", "html", "css"
-            ],
-            "cybersecurity analyst": [
-                "cybersecurity", "networking", "linux", "firewall",
-                "penetration testing"
-            ],
-            "android developer": [
-                "java", "sql", "api", "git", "github"
-            ],
-            "software developer": [
-                "python", "java", "javascript", "sql", "git", "github",
-                "database", "problem solving"
-            ],
+            # IT
+            "web developer": ["html", "css", "javascript", "bootstrap", "git", "github", "rest api", "database"],
+            "frontend developer": ["html", "css", "javascript", "react", "bootstrap", "git", "github"],
+            "backend developer": ["python", "django", "flask", "node.js", "express.js", "sql", "database", "rest api", "git"],
+            "full stack developer": ["html", "css", "javascript", "python", "django", "node.js", "sql", "rest api", "git", "database"],
+            "python developer": ["python", "django", "flask", "sql", "rest api", "git", "database"],
+            "software developer": ["python", "java", "javascript", "sql", "git", "database", "problem solving"],
+
+            # Data
+            "data analyst": ["sql", "excel", "python", "pandas", "numpy", "power bi", "data analytics", "dashboard", "reporting"],
+            "business analyst": ["excel", "sql", "power bi", "data analytics", "communication", "problem solving"],
+            "data scientist": ["python", "sql", "pandas", "numpy", "machine learning", "statistics"],
+
+            # Banking / Finance
+            "banking": ["banking", "finance", "excel", "kyc", "loan processing", "communication"],
+            "accountant": ["accounting", "tally", "gst", "taxation", "bookkeeping", "excel"],
+            "finance analyst": ["finance", "financial analysis", "excel", "accounting", "investment"],
+            "ca": ["accounting", "auditing", "taxation", "gst", "balance sheet", "financial analysis"],
+            "audit assistant": ["auditing", "accounting", "taxation", "excel"],
+
+            # HR / Operations
+            "hr executive": ["hr", "recruitment", "payroll", "communication", "employee engagement"],
+            "recruiter": ["recruitment", "communication", "hr", "crm"],
+            "operations executive": ["operations", "excel", "inventory management", "vendor management"],
+
+            # Sales / Marketing
+            "sales executive": ["sales", "communication", "lead generation", "crm"],
+            "marketing executive": ["marketing", "digital marketing", "communication", "social media marketing"],
+            "digital marketing": ["digital marketing", "seo", "social media marketing", "marketing"],
+
+            # Teaching
+            "teacher": ["teaching", "communication", "lesson planning", "classroom management", "student assessment"],
+            "faculty": ["teaching", "communication", "curriculum", "student assessment"],
+
+            # Customer support / Hospitality
+            "customer support": ["customer support", "communication", "problem solving", "crm"],
+            "bpo": ["bpo", "communication", "customer support"],
+            "receptionist": ["front office", "communication", "ms office"],
+            "hospitality": ["hospitality", "customer service", "communication"],
         }
 
         role_based_skills = []
@@ -212,20 +272,9 @@ def analyze_resume(request):
                 role_based_skills.extend(skills)
 
         if "intern" in job_lower or "internship" in job_lower:
-            if "web" in job_lower:
-                role_based_skills.extend(role_skill_map["web developer"])
-            elif "frontend" in job_lower or "front end" in job_lower:
-                role_based_skills.extend(role_skill_map["frontend developer"])
-            elif "backend" in job_lower:
-                role_based_skills.extend(role_skill_map["backend developer"])
-            elif "full stack" in job_lower or "fullstack" in job_lower:
-                role_based_skills.extend(role_skill_map["full stack developer"])
-            elif "python" in job_lower:
-                role_based_skills.extend(role_skill_map["python developer"])
-            elif "data" in job_lower:
-                role_based_skills.extend(role_skill_map["data analyst"])
-            elif "qa" in job_lower or "testing" in job_lower:
-                role_based_skills.extend(role_skill_map["qa tester"])
+            for role, skills in role_skill_map.items():
+                if role.split()[0] in job_lower:
+                    role_based_skills.extend(skills)
 
         jd_required_skills = []
 
@@ -246,50 +295,21 @@ def analyze_resume(request):
                     resume_skills.append(skill)
 
         project_keywords = [
-            "project", "developed", "built", "created", "implemented",
-            "designed", "deployed", "integrated", "dashboard", "website",
-            "web app", "application", "system", "portfolio", "management"
+            "project", "developed", "built", "created", "implemented", "designed",
+            "deployed", "integrated", "dashboard", "website", "application",
+            "system", "portfolio", "management"
         ]
 
-        internship_keywords = [
-            "internship", "intern", "trainee", "industrial training"
-        ]
+        internship_keywords = ["internship", "intern", "trainee", "industrial training"]
+        work_keywords = ["work experience", "professional experience", "worked at", "employment", "company"]
+        achievement_keywords = ["certification", "certificate", "achievement", "award", "solved", "completed", "course"]
+        education_keywords = ["b.tech", "bachelor", "degree", "engineering", "b.com", "bca", "bba", "mba", "m.com", "diploma", "graduate", "education", "college", "university"]
 
-        work_keywords = [
-            "work experience", "professional experience", "worked at",
-            "software developer", "web developer", "engineer", "employment"
-        ]
-
-        achievement_keywords = [
-            "certification", "certificate", "achievement", "award",
-            "solved", "completed", "course", "hackathon", "scaler", "infosys"
-        ]
-
-        education_keywords = [
-            "b.tech", "bachelor", "degree", "engineering",
-            "computer science", "diploma", "graduate", "education",
-            "college", "university"
-        ]
-
-        project_evidence = [
-            keyword for keyword in project_keywords if keyword in resume_lower
-        ]
-
-        internship_evidence = [
-            keyword for keyword in internship_keywords if keyword in resume_lower
-        ]
-
-        work_evidence = [
-            keyword for keyword in work_keywords if keyword in resume_lower
-        ]
-
-        achievement_evidence = [
-            keyword for keyword in achievement_keywords if keyword in resume_lower
-        ]
-
-        education_evidence = [
-            keyword for keyword in education_keywords if keyword in resume_lower
-        ]
+        project_evidence = [keyword for keyword in project_keywords if keyword in resume_lower]
+        internship_evidence = [keyword for keyword in internship_keywords if keyword in resume_lower]
+        work_evidence = [keyword for keyword in work_keywords if keyword in resume_lower]
+        achievement_evidence = [keyword for keyword in achievement_keywords if keyword in resume_lower]
+        education_evidence = [keyword for keyword in education_keywords if keyword in resume_lower]
 
         matched_skills = []
         missing_skills = []
@@ -305,18 +325,12 @@ def analyze_resume(request):
         else:
             skill_score = 0
 
-        project_score = min(len(project_evidence) * 3, 10)
-        internship_score = min(len(internship_evidence) * 5, 5)
-        work_score = min(len(work_evidence) * 5, 5)
-        achievement_score = min(len(achievement_evidence) * 2, 5)
-        education_score = min(len(education_evidence) * 2, 5)
-
         evidence_score = (
-            project_score
-            + internship_score
-            + work_score
-            + achievement_score
-            + education_score
+            min(len(project_evidence) * 3, 10)
+            + min(len(internship_evidence) * 5, 5)
+            + min(len(work_evidence) * 5, 5)
+            + min(len(achievement_evidence) * 2, 5)
+            + min(len(education_evidence) * 2, 5)
         )
 
         if evidence_score > 25:
@@ -342,17 +356,15 @@ def analyze_resume(request):
         prompt = f"""
 You are a professional ATS Resume Analyzer and HR screening assistant.
 
-Very Important Rules:
+Rules:
+- Support IT and non-IT resumes.
+- Support jobs and internships.
 - Do not invent skills.
 - Do not mention candidate type.
-- Do not contradict the calculated matched skills and missing skills.
-- Do not say a skill is missing if it is already present in Resume Skills Found.
-- Use only the provided lists below.
-- The ATS score is already calculated logically. Do not change it.
-- Analyze full resume including skills, projects, internships, work experience, certifications, achievements, and education.
-- Support both jobs and internships.
 - Do not use markdown symbols like **, ##, ###.
-- Keep section headings clean and readable.
+- The ATS score is already calculated logically. Do not change it.
+- If skills are missing, give practical improvement suggestions.
+- Analyze skills, education, projects, internships, work experience, certifications, and achievements.
 
 Job Description:
 {job_desc}
@@ -397,18 +409,19 @@ Generate a clean professional report in this exact format:
 
 1. ATS Score:
 2. Application Decision:
-3. JD Required Skills:
-4. Skills Found In Resume:
-5. Matched Skills:
-6. Missing Important Skills:
-7. Project Relevance:
-8. Internship / Work Experience Relevance:
-9. Achievement / Certification Relevance:
-10. Education Relevance:
-11. Is This Resume Suitable For The Job?:
-12. Resume Improvement Suggestions:
-13. Skills To Learn Before Applying:
-14. Final Recommendation:
+3. Job Role Identified:
+4. JD Required Skills:
+5. Skills Found In Resume:
+6. Matched Skills:
+7. Missing Important Skills:
+8. Project Relevance:
+9. Internship / Work Experience Relevance:
+10. Achievement / Certification Relevance:
+11. Education Relevance:
+12. Is This Resume Suitable For The Job?:
+13. Resume Improvement Suggestions:
+14. Skills To Learn Before Applying:
+15. Final Recommendation:
 """
 
         chat_completion = client.chat.completions.create(
@@ -421,36 +434,7 @@ Generate a clean professional report in this exact format:
             model="llama-3.1-8b-instant",
         )
 
-        result = chat_completion.choices[0].message.content
-
-        # Remove markdown symbols
-        result = result.replace("**", "")
-        result = result.replace("###", "")
-        result = result.replace("##", "")
-
-        # Highlight report section headings
-        section_headings = [
-            "ATS Score",
-            "Application Decision",
-            "JD Required Skills",
-            "Skills Found In Resume",
-            "Matched Skills",
-            "Missing Important Skills",
-            "Project Relevance",
-            "Internship / Work Experience Relevance",
-            "Achievement / Certification Relevance",
-            "Education Relevance",
-            "Is This Resume Suitable For The Job?",
-            "Resume Improvement Suggestions",
-            "Skills To Learn Before Applying",
-            "Final Recommendation"
-        ]
-
-        for heading in section_headings:
-            result = result.replace(
-                heading + ":",
-                '<span class="report-heading">' + heading + ':</span>'
-            )
+        result = clean_ai_output(chat_completion.choices[0].message.content)
 
         request.session["result"] = result
         request.session["ats_score"] = ats_score
@@ -478,4 +462,89 @@ def result_page(request):
         "matched_count": request.session.get("matched_count", 0),
         "missing_count": request.session.get("missing_count", 0),
         "jd_count": request.session.get("jd_count", 0),
+    })
+
+
+def resume_builder(request):
+    return render(request, "resume_builder.html")
+
+
+def build_resume(request):
+
+    if request.method == "POST":
+
+        full_name = request.POST.get("full_name", "")
+        email = request.POST.get("email", "")
+        phone = request.POST.get("phone", "")
+        target_role = request.POST.get("target_role", "")
+        education = request.POST.get("education", "")
+        skills = request.POST.get("skills", "")
+        projects = request.POST.get("projects", "")
+        experience = request.POST.get("experience", "")
+        certifications = request.POST.get("certifications", "")
+        achievements = request.POST.get("achievements", "")
+
+        prompt = f"""
+You are an expert resume writer and ATS optimization specialist.
+
+Create a professional ATS-friendly resume content for the following candidate.
+Support IT and non-IT roles.
+Keep it professional, concise, and recruiter-friendly.
+Do not use markdown symbols like **, ##, ###.
+Use strong action verbs.
+Create content suitable for a resume.
+
+Candidate Details:
+Name: {full_name}
+Email: {email}
+Phone: {phone}
+Target Role: {target_role}
+Education: {education}
+Skills: {skills}
+Projects: {projects}
+Experience / Internship: {experience}
+Certifications: {certifications}
+Achievements: {achievements}
+
+Generate resume in this format:
+
+Professional Summary:
+Career Objective:
+Key Skills:
+Education:
+Projects:
+Experience / Internship:
+Certifications:
+Achievements:
+ATS Improvement Tips:
+"""
+
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ],
+            model="llama-3.1-8b-instant",
+        )
+
+        generated_resume = clean_ai_output(chat_completion.choices[0].message.content)
+
+        request.session["generated_resume"] = generated_resume
+
+        return redirect("/builder-result/")
+
+    return redirect("/resume-builder/")
+
+
+def builder_result(request):
+
+    generated_resume = request.session.get("generated_resume", None)
+
+    if not generated_resume:
+        return redirect("/resume-builder/")
+
+    return render(request, "builder_result.html", {
+        "generated_resume": generated_resume
     })

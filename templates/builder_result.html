@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generated Resume</title>
+    {% load static %}
+
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+
+<body>
+
+<div class="result-page">
+
+    <div class="result-container">
+
+        <div class="result-header-card">
+            <div>
+                <p class="tag">AI GENERATED RESUME</p>
+                <h1>Your ATS-Friendly Resume Content</h1>
+                <p class="subtitle-small">
+                    Copy this content into your resume template and customize it if needed.
+                </p>
+            </div>
+
+            <a href="{% url 'resume_builder' %}" class="back-btn">Create Another Resume</a>
+        </div>
+
+        <div class="report-card-final">
+            <div class="report-title-row">
+                <div>
+                    <p class="tag">PROFESSIONAL RESUME DRAFT</p>
+                    <h2>Generated Resume Content</h2>
+                </div>
+            </div>
+
+            <div class="result-content professional-report">
+{{ generated_resume|safe }}
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

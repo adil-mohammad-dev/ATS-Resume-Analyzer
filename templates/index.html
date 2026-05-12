@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AI Resume Analyzer</title>
+    <title>AI Resume Analyzer & Builder</title>
     {% load static %}
 
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
     <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
 
@@ -11,35 +12,34 @@
 
 <div class="page">
 
-    <!-- Navbar -->
     <nav class="navbar">
         <div class="logo-box">
             <div class="logo">AI</div>
             <div>
                 <h2>ResumeAI</h2>
-                <p>ATS Resume Analyzer</p>
+                <p>Analyzer & Resume Builder</p>
             </div>
         </div>
 
         <div class="nav-links">
             <a href="#analyze-section">Analyze Resume</a>
+            <a href="{% url 'resume_builder' %}" class="secondary-nav">Create Resume</a>
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <section class="hero">
 
         <div class="hero-left">
-            <p class="tag">AI POWERED RESUME CHECKER</p>
+            <p class="tag">AI POWERED RESUME PLATFORM</p>
 
-            <h1>Is your resume good enough for this job?</h1>
+            <h1>Build and analyze resumes for any job role.</h1>
 
             <p class="subtitle">
-                Upload your resume and paste a job description to get a professional ATS score,
-                matched skills, missing skills, job-fit analysis, and improvement suggestions.
+                Analyze your resume against IT, Non-IT, Banking, Finance, Teaching, HR,
+                Sales, Marketing, Operations, and internship job descriptions. You can also
+                create a professional ATS-friendly resume using AI.
             </p>
 
-            <!-- Upload Form -->
             <div class="upload-panel" id="analyze-section">
                 <form method="POST" enctype="multipart/form-data" action="{% url 'analyze_resume' %}">
                     {% csrf_token %}
@@ -54,7 +54,7 @@
                         <textarea
                             name="jobdesc"
                             rows="6"
-                            placeholder="Paste the job description here..."
+                            placeholder="Paste any job description here: IT, Banking, Finance, Teaching, HR, Sales, Marketing, etc."
                             required></textarea>
                     </div>
 
@@ -65,13 +65,12 @@
             </div>
         </div>
 
-        <!-- Right Info Card -->
         <div class="hero-right">
             <div class="preview-card">
 
                 <div class="preview-header">
-                    <h3>What This System Checks</h3>
-                    <span>Real Analysis</span>
+                    <h3>What This Platform Does</h3>
+                    <span>AI Powered</span>
                 </div>
 
                 <div class="analysis-flow">
@@ -79,40 +78,40 @@
                     <div class="flow-step">
                         <div class="step-number">1</div>
                         <div>
-                            <h4>Resume Parsing</h4>
-                            <p>Extracts text from the uploaded resume PDF.</p>
+                            <h4>Resume Analysis</h4>
+                            <p>Checks resume against any job description and calculates ATS score.</p>
                         </div>
                     </div>
 
                     <div class="flow-step">
                         <div class="step-number">2</div>
                         <div>
-                            <h4>JD Skill Matching</h4>
-                            <p>Compares resume skills with the job description requirements.</p>
+                            <h4>All Role Support</h4>
+                            <p>Supports IT, Non-IT, Banking, Finance, Teaching, HR, Sales, and more.</p>
                         </div>
                     </div>
 
                     <div class="flow-step">
                         <div class="step-number">3</div>
                         <div>
-                            <h4>ATS Score Calculation</h4>
-                            <p>Calculates score based on matched skills and resume evidence.</p>
+                            <h4>Skill Gap Report</h4>
+                            <p>Shows matched skills, missing skills, and improvement suggestions.</p>
                         </div>
                     </div>
 
                     <div class="flow-step">
                         <div class="step-number">4</div>
                         <div>
-                            <h4>AI Improvement Report</h4>
-                            <p>Generates missing skills, suitability, and resume improvement suggestions.</p>
+                            <h4>AI Resume Builder</h4>
+                            <p>Creates professional ATS-friendly resume content for your target role.</p>
                         </div>
                     </div>
 
                 </div>
 
                 <div class="info-note">
-                    <strong>Output:</strong> ATS score, matched skills, missing skills, project relevance,
-                    and final recommendation.
+                    <strong>Best for:</strong> Freshers, interns, IT candidates, B.Com, BBA, MBA,
+                    finance, banking, teaching, HR, sales, and non-IT job seekers.
                 </div>
 
             </div>
