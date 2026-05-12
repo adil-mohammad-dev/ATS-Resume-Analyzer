@@ -498,6 +498,9 @@ Candidate Details:
 Name: {full_name}
 Email: {email}
 Phone: {phone}
+location = request.POST.get("location", "")
+linkedin = request.POST.get("linkedin", "")
+portfolio = request.POST.get("portfolio", "")
 Target Role: {target_role}
 Education: {education}
 Skills: {skills}
